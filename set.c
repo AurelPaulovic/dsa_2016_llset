@@ -22,26 +22,21 @@ int main(int argc, const char* argv[]) {
 }
 
 Element * removeElement(Element * list, Element * ele) {
-	if (ele == NULL) {
+	if (ele == NULL || list == NULL) {
 		return list;
 	}
 	
-	Element * predecessor = findPredecessor(list, ele->value);
+	if (list == ele) {
+		return list->next;
+	}
 
-	if (predecessor == NULL) {
-		// the ele is either the first element of the list or we did not find it in the list
-		if (list == ele) {
-			list = list->next;
-			freeElement(ele);
-		} else {
-			// NOOP
-		}
-	} else if (predecessor->next == ele) {
-		predecessor->next = ele->next;
-		freeElement(ele);
-	} else {
-		// we found invalid predecessor -> ele is invalid
-		// NOOP
+	Element * previousElement = list;
+	while (previousElement->next != NULL && previousElement->next != ele) {
+		previousElement = previousElement->next;
+	}
+
+	if (previousElement->next == ele) {
+		previousElement->next = previousElement->next->next;
 	}
 
 	return list;

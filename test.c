@@ -24,10 +24,11 @@ static char * _intArrayToString(int array[], int length) {
 
 	char * result = (char *) malloc(sizeof(char) * totalLength + length*2 + 1 + 2);
 	if (result == NULL) {
-		perror("Could not allocate memory for string reprsentation of an array");
+		perror("Could not allocate memory for string representation of an array");
 		return 0;
 	}
-	strcat(result,"[");
+	
+	strcpy(result,"[");
 
 	for (int i = 0; i < length; i++) {
 		if (i != 0) {
@@ -42,6 +43,30 @@ static char * _intArrayToString(int array[], int length) {
 	return result;
 }
 
+static char * _intListToString(Element * list) {
+	int listLength = 0;
+	Element * currentEle = NULL;
+
+	currentEle = list;
+	while (currentEle != NULL) {
+		listLength++;
+		currentEle = currentEle->next;
+	}
+	
+	int listAsStrings[listLength];
+
+	currentEle = list;
+	int currentIdx = 0;
+
+	while (currentEle != NULL) {
+		listAsStrings[currentIdx] = currentEle->value;
+		currentEle = currentEle->next;
+		currentIdx++;
+	}
+
+	return _intArrayToString(listAsStrings, listLength);
+}
+
 int _assertListElements(int expectedListElements[], int expectedSize, Element * list) {
 	if (list == NULL && (expectedListElements == NULL || expectedSize == 0)) {
 		return 1;
@@ -52,22 +77,26 @@ int _assertListElements(int expectedListElements[], int expectedSize, Element * 
 	for (int i = 0; i < expectedSize ; i++, currentEle = currentEle->next) {
 		if (currentEle == NULL || expectedListElements[i] != currentEle->value) {
 			char * expectedAsString = _intArrayToString(expectedListElements, expectedSize);
+			char * actualAsString = _intListToString(list);
 			fprintf(stderr, "The list does not have expected elements.\nExpected elements: %s\nActual elements: %s\n", 
 					expectedAsString, 
-					"abc" // TODO _intListToString(list)
+					actualAsString
 			       );
 			free(expectedAsString);
+			free(actualAsString);
 			return 0;
 		}
 	}
 
 	if (currentEle != NULL && currentEle->next != NULL) {
 		char * expectedAsString = _intArrayToString(expectedListElements, expectedSize);
+		char * actualAsString = _intListToString(list);
 		fprintf(stderr, "The list does not have expected elements.\nExpected elements: %s\nActual elements: %s\n", 
 				expectedAsString, 
-				"abc" // TODO _intListToString(list)
+				actualAsString
 		       );
 		free(expectedAsString);
+		free(actualAsString);
 		return 0;
 	}
 
@@ -269,6 +298,7 @@ void test_removeFirstElementFromListWithMultipleElements() {
 	list = removeElement(list, ele1);
 	assertListElements(((int[]){2, 3}), 2, list);
 
+	freeElement(ele1);
 	freeElement(ele2);
 	freeElement(ele3);
 }
@@ -297,6 +327,7 @@ void test_removeLastElementFromListWithMultipleElements() {
 
 	freeElement(ele1);
 	freeElement(ele2);
+	freeElement(ele3);
 }
 
 void test_removeElementFromList() {
@@ -322,6 +353,7 @@ void test_removeElementFromList() {
 	assertListElements(((int[]){1, 3}), 2, list);
 
 	freeElement(ele1);
+	freeElement(ele2);
 	freeElement(ele3);
 }
 
