@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "set.h"
+#include "test.h"
 
 static char * _intArrayToString(int array[], int length) {
 	char * arrayAsStrings[length];
@@ -53,7 +54,7 @@ int _assertListElements(int expectedListElements[], int expectedSize, Element * 
 			char * expectedAsString = _intArrayToString(expectedListElements, expectedSize);
 			fprintf(stderr, "The list does not have expected elements.\nExpected elements: %s\nActual elements: %s\n", 
 					expectedAsString, 
-					"abc" //_intListToString(list)
+					"abc" // TODO _intListToString(list)
 			       );
 			free(expectedAsString);
 			return 0;
@@ -64,7 +65,7 @@ int _assertListElements(int expectedListElements[], int expectedSize, Element * 
 		char * expectedAsString = _intArrayToString(expectedListElements, expectedSize);
 		fprintf(stderr, "The list does not have expected elements.\nExpected elements: %s\nActual elements: %s\n", 
 				expectedAsString, 
-				"abc" //_intListToString(list)
+				"abc" // TODO _intListToString(list)
 		       );
 		free(expectedAsString);
 		return 0;
@@ -73,4 +74,316 @@ int _assertListElements(int expectedListElements[], int expectedSize, Element * 
 	return 1;
 }
 
+void test_insertFirstElement() {
+	printf("Running test: insert first element in empty list\n");
 
+	Element * ele = allocNewElement();
+	ele->value = 1;
+
+	Element * list = insertElement(NULL, ele);
+
+	assertListElements(((int[]){1}), 1, list);
+	freeElement(ele);
+}
+
+void test_insertMultipleElementsInOrder() {
+	printf("Running test: insert multiple elements into list in correct order\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * ele4 = allocNewElement();
+	ele4->value = 4;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+	list = insertElement(list, ele4);
+
+	assertListElements(((int[]){1, 2, 3, 4}), 4, list);
+	
+	freeElement(ele1);
+	freeElement(ele2);
+	freeElement(ele3);
+	freeElement(ele4);
+}
+
+void test_insertMultipleElementsInDifferentOrders() {
+	printf("Running test: insert multiple elements into list in different order\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * ele4 = allocNewElement();
+	ele4->value = 4;
+
+	Element * list1 = NULL;
+	list1 = insertElement(list1, ele4);
+	list1 = insertElement(list1, ele3);
+	list1 = insertElement(list1, ele2);
+	list1 = insertElement(list1, ele1);
+
+	Element * list2 = NULL;
+	list2 = insertElement(list2, ele2);
+	list2 = insertElement(list2, ele4);
+	list2 = insertElement(list2, ele1);
+	list2 = insertElement(list2, ele3);
+
+	int expected[] = {1, 2, 3, 4};
+
+	assertListElements(expected, 4, list1);
+	assertListElements(expected, 4, list2);
+
+	freeElement(ele1);
+	freeElement(ele2);
+	freeElement(ele3);
+	freeElement(ele4);
+}
+
+void test_insertSameValueMultipleTimesPreservesUniqueForFirst() {
+	printf("Running test: insert single element into empty list multiple times\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele1_dup = allocNewElement();
+	ele1_dup->value = 1;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele1_dup);
+
+	assertListElements(((int[]){1}), 1, list);
+
+	freeElement(ele1);
+	freeElement(ele1_dup);
+}
+
+void test_insertSameValueMultipleTimesPreservesUnique() {
+	printf("Running test: insert multiple elements into list multiple times\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * ele1_dup = allocNewElement();
+	ele1_dup->value = 1;
+
+	Element * ele2_dup = allocNewElement();
+	ele2_dup->value = 2;
+
+	Element * ele3_dup = allocNewElement();
+	ele3_dup->value = 3;
+
+	int expected[] = {1, 2, 3};
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(expected, 3, list);
+
+	list = insertElement(list, ele1_dup);
+	assertListElements(expected, 3, list);
+
+	list = insertElement(list, ele2_dup);
+	assertListElements(expected, 3, list);
+
+	list = insertElement(list, ele3_dup);
+	assertListElements(expected, 3, list);
+
+	freeElement(ele1);
+	freeElement(ele2);
+	freeElement(ele3);
+	freeElement(ele1_dup);
+	freeElement(ele2_dup);
+	freeElement(ele3_dup);
+}
+
+void test_removeElementFromEmptyList() {
+	printf("Running test: remove element from empty list\n");
+
+	Element * ele = allocNewElement();
+	ele->value = 1;
+
+	Element * list = NULL;
+	list = removeElement(list, ele);
+
+	assert(NULL == list);
+}
+
+void test_removeElementFromListWithOneElement() {
+	printf("Running test: remove element from list with single element\n");
+
+	Element * ele = allocNewElement();
+	ele->value = 1;
+
+	Element * list = NULL;
+	list = insertElement(list, ele);
+
+	assertListElements(((int[]){1}), 1, list);
+
+	removeElement(list, ele);
+
+	assertListElements(((int[]){}), 0, list);
+}
+
+void test_removeFirstElementFromListWithMultipleElements() {
+	printf("Running test: remove first element from list\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	list = removeElement(list, ele1);
+	assertListElements(((int[]){2, 3}), 2, list);
+
+	freeElement(ele2);
+	freeElement(ele3);
+}
+
+void test_removeLastElementFromListWithMultipleElements() {
+	printf("Running test: remove last element from list with multiple elements\n");
+	
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	list = removeElement(list, ele3);
+	assertListElements(((int[]){1, 2}), 2, list);
+
+	freeElement(ele1);
+	freeElement(ele2);
+}
+
+void test_removeElementFromList() {
+	printf("Running test: remove element from list\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	list = removeElement(list, ele2);
+	assertListElements(((int[]){1, 3}), 2, list);
+
+	freeElement(ele1);
+	freeElement(ele3);
+}
+
+void test_removeNonExistingElementFromList() {
+	printf("Running test: remove non-existing element from list\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	Element * nonExistingEle = allocNewElement();
+	nonExistingEle->value = 4;
+	list = removeElement(list, nonExistingEle);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	freeElement(ele1);
+	freeElement(ele2);
+	freeElement(ele3);
+	freeElement(nonExistingEle);
+}
+
+void test_removeElementWithExistingValueButBadPointer() {
+	printf("Running test: remove element with existing value but bad pointer\n");
+
+	Element * ele1 = allocNewElement();
+	ele1->value = 1;
+
+	Element * ele2 = allocNewElement();
+	ele2->value = 2;
+
+	Element * ele3 = allocNewElement();
+	ele3->value = 3;
+
+	Element * list = NULL;
+	list = insertElement(list, ele1);
+	list = insertElement(list, ele2);
+	list = insertElement(list, ele3);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	Element * eleWithBadPointer = allocNewElement();
+	eleWithBadPointer->value = 2;
+
+	list = removeElement(list, eleWithBadPointer);
+
+	assertListElements(((int[]){1, 2, 3}), 3, list);
+
+	freeElement(ele1);
+	freeElement(ele2);
+	freeElement(ele3);
+	freeElement(eleWithBadPointer);
+}

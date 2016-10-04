@@ -4,28 +4,47 @@
 #include "test.h"
 
 int main(int argc, const char* argv[]) {
-	Element * ele = allocNewElement();
-	ele->value = 1;
-	
-	Element * ele2 = allocNewElement();
-	ele2->value = 4;
+	test_insertFirstElement();
+	test_insertMultipleElementsInOrder();
+	test_insertMultipleElementsInDifferentOrders();
+	test_insertSameValueMultipleTimesPreservesUniqueForFirst();
+	test_insertSameValueMultipleTimesPreservesUnique();
 
-	Element * ele3 = allocNewElement();
-	ele3->value = 2;
-
-	Element * list = insertElement(NULL, ele);
-	list = insertElement(list, ele2);
-	list = insertElement(list, ele3);
-
-	printList(list);
-
-	assertListElements(((int[]){1, 2, 4}), 3, list);
-	
-	free(ele);
-	free(ele2);
-	free(ele3);
+	test_removeElementFromEmptyList();
+	test_removeElementFromListWithOneElement();
+	test_removeFirstElementFromListWithMultipleElements();
+	test_removeLastElementFromListWithMultipleElements();
+	test_removeElementFromList();
+	test_removeNonExistingElementFromList();
+	test_removeElementWithExistingValueButBadPointer();
 
 	return 0;
+}
+
+Element * removeElement(Element * list, Element * ele) {
+	if (ele == NULL) {
+		return list;
+	}
+	
+	Element * predecessor = findPredecessor(list, ele->value);
+
+	if (predecessor == NULL) {
+		// the ele is either the first element of the list or we did not find it in the list
+		if (list == ele) {
+			list = list->next;
+			freeElement(ele);
+		} else {
+			// NOOP
+		}
+	} else if (predecessor->next == ele) {
+		predecessor->next = ele->next;
+		freeElement(ele);
+	} else {
+		// we found invalid predecessor -> ele is invalid
+		// NOOP
+	}
+
+	return list;
 }
 
 Element * insertElement(Element * list, Element * newEle) {
@@ -34,7 +53,6 @@ Element * insertElement(Element * list, Element * newEle) {
 	}
 
 	Element * predecessor = findPredecessor(list, newEle->value);
-	// predecessor is the last smaller or equal element in the list
 
 	if (predecessor == NULL) {
 		// newEle is first element in list
@@ -82,6 +100,10 @@ void printList(Element * ele) {
 
 void printElement(Element * ele) {
 	printf("%d\n", ele->value);
+}
+
+void freeElement(Element * ele) {
+	free(ele);
 }
 
 Element * allocNewElement() {
